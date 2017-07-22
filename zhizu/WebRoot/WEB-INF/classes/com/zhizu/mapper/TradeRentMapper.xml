@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	namespace：必须与对应的接口全类名一致
+	id:必须与对应接口的某个对应的方法名一致
+ -->
+<mapper namespace="com.zhizu.mapper.TradeRentMapper">
+	
+	
+	<resultMap type="TradeRent" id="tradeRentResult">
+		<!-- 映射数据表中的主键 -->
+		<!-- column表示数据表中的字段，property表示实体类中的属性 -->
+		<id property="rentId" column="rentId" />
+		<!-- 映射数据表中的普通列 -->
+		
+		<result property="rentNum" column="rentNum"/>
+		<result property="rentSubmitDate" column="rentSubmitDate"/>
+		<result property="rentEndDate" column="rentEndDate"/>
+		<result property="returnLastDate" column="returnLastDate"/>
+		<result property="returnRealDate" column="returnRealDate"/>
+		
+		
+		<!-- 映射数据表中的外键列 -->
+		<!-- 多对一 -->
+		<association property="trade" select="com.zhizu.mapper.TradeMapper.findByTradeId" column="rentTradeId">
+		</association>
+		<association property="rentUser" select="com.zhizu.mapper.UserMapper.findById" column="rentUserId">
+		</association>
+		<association property="borderUser" select="com.zhizu.mapper.UserMapper.findById" column="borderUserId">
+		</association>
+		<association property="rentType" select="com.zhizu.mapper.TradeRentMapper.findByRentTypeId" column="rentTypeId">
+		</association>
+		<association property="userAddress" select="com.zhizu.mapper.UserAddressMapper.findById" column="addressId">
+		</association>
+	</resultMap>
+	
+	
+	
+	<insert id="save" parameterType="TradeRent">
+		insert into trade_rent
+		values(null,#{trade.tradeId},#{rentUser.userId},#{borderUser.userId},#{rentNum},
+		#{rentSubmitDate},null,#{rentType.rentTypeId},null,null,#{userAddress.addressId})
+	</insert>
+	
+	<update id="update" parameterType="TradeRent">
+		update trade_rent set tradeId=#{trade.tradeId},rentUserId=#{rentUser.userId},borderUserId=#{borderUser.userId},
+		rentNum=#{rentNum},rentSubmitDate=#{rentSubmitDate},rentEndDate=#{rentEndDate},rentType=#{rentType.rentTypeId}
+		returnLastDate=#{returnLastDate},returnRealDate=#{returnRealDate} where rentId=#{id}
+	</update>
+	
+	<update id="updateRentType">
+		update trade_rent set 
+		rentTypeId=#{1},
+		rentEndDate= #{2}
+		where rentId=#{0}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from trade_rent where rentId=#{id}
+	</delete>
+	
+	 <!-- mybsits_config中配置的alias类别名,也可直接配置resultType为类路劲 -->  
+	<select id="findByRentId" parameterType="int" resultMap="tradeRentResult">
+		select * from trade_rent where rentId=#{id}
+	</select>
+	
+	<select id="findByBorderUserId" parameterType="int" resultMap="tradeRentResult">
+		select * from trade_rent where borderUserId = #{borderUserId}
+	</select>
+	
+	<select id="findByRentUserId" parameterType="int" resultMap="tradeRentResult">
+		select * from trade_rent where rentUserId = #{rentUserId}
+	</select>
+	
+	<select id="findAll" resultType="TradeRent">
+		select * from trade_rent 
+	</select>
+	
+	<select id="findByRentTypeId" resultType="RentType" parameterType="int">
+		select * from rent_type where rentTypeId = #{rentTypeId}
+	</select>
+	
+	<select id="findByBorderIdAndTypeId" resultMap="tradeRentResult">
+		select * from trade_rent where rentTypeId = #{0} and borderUserId = #{1}
+	</select>
+	
+	<select id="findByRenterIdAndTypeId" resultMap="tradeRentResult">
+		select * from trade_rent where rentTypeId = #{0} and rentUserId = #{1}
+	</select>
+	
+	<!-- 更新订单最晚归还时间 -->
+	<select id="updateLastDate" parameterType="int">
+        CALL lastDate(#{rentId})
+    </select>
+	
+</mapper>

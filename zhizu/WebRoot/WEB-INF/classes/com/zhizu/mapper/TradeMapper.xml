@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zhizu.mapper.TradeMapper">
+	<resultMap type="Trade" id="TradeList">
+		<!-- 映射数据表中的主键 column:表示数据表中的字段 property：实体类中的属性 -->
+		<id column="tradeId" property="tradeId" />
+
+		<!-- 映射数据表中的普通列 column:表示数据表中的字段 property：实体类中的属性 -->
+		<result property="tradeName" column="tradeName" />
+		<result property="price" column="price" />
+		<result property="trDescript" column="trDescript" />
+		<result property="tradeNum" column="tradeNum" />
+		<result property="photo" column="photo" />
+		<result property="createDate" column="createDate" />
+		<result property="tradeDeposit" column="tradeDeposit"/>
+		<!-- 多对一映射  外键列  property:封装数据的属性  select:要执行的方法  column:外键列，根据此列中的值获取对象-->
+		<association property="tradeType" select="com.zhizu.mapper.TradeMapper.findByTypeIdforT" column="typeId"/>
+		<association property="user" select="com.zhizu.mapper.UserMapper.findById" column="userId"/>
+		
+	</resultMap>
+	
+	<!-- 按商品名称查找商品-->
+	<select id="findByTradeName" parameterType="String" resultMap="TradeList">
+		select *
+		from trade where tradeName = #{tradeName}
+	</select>
+	<!-- 按商品类型查找商品-->
+	<select id="findByTradeType" parameterType="int" resultMap="TradeList">
+		select *
+		from trade where typeId = #{id}
+	</select>
+	<!-- 按商品分类ID寻找商品分类名 -->
+	<select id="findByTypeIdforT" parameterType="int" resultType="TradeType">
+		select *
+		from trade_type where typeId = #{id}
+	</select>
+	
+	
+	<!-- 查询，返回的结果映射在 resultMap中 -->
+	<select id="findAll" resultMap="TradeList">
+		select * from trade
+	</select>
+    <!-- 根据商品id查询对应的商品信息-->
+	<select id="findByTradeId" parameterType="int" resultMap="TradeList">
+		select *
+		from trade where tradeId = #{id}
+	</select>
+	
+	<!-- 根据商品id查询对应的商品信息-->
+	<select id="findById" parameterType="int" resultType="Trade">
+		select *
+		from trade where tradeId = #{id}
+	</select>
+	
+	 <!-- 根据商品id查询对应的商品信息-->
+	<select id="findByTypeId" parameterType="int" resultMap="TradeList">
+		select *
+		from trade where typeId = #{id}
+	</select>
+	
+	<!-- 根据用户id查询相关的商品信息-->
+	<select id="findByUserId" parameterType="int" resultMap="TradeList">
+	   select * from trade where userId=#{id}
+	</select>
+	<!-- 根据拉黑记录的id查询对应的商品信息-->
+	<select id="findByReportId" parameterType="int" resultType="Trade">
+		select *
+		from trade where reportId = #{id}
+	</select>
+	<!-- 根据租借表订单记录的id查询对应的商品信息-->
+	<select id="findByRentId" parameterType="int" resultType="Trade">
+		select *
+		from trade where rentId = #{id}
+	</select>
+
+	<insert id="save" parameterType="Trade" useGeneratedKeys="true" keyProperty="tradeId">
+		insert into trade
+		values(null,#{tradeName},#{user.userId},#{tradeType.typeId},
+		#{price},#{trDescript},#{tradeNum},#{photo},#{createDate},#{tradeDeposit})
+	</insert>
+	<delete id="delete" parameterType="int">
+		delete from trade where
+		tradeId = #{id}
+	</delete>
+    <update id="update" parameterType="Trade">
+        update trade set tradeName=#{tradeName},userId=#{user.userId} ,typeId=#{tradeType.typeId} ,
+        price=#{price},trDescript=#{trDescript},tradeNum=#{tradeNum},photo=#{photo},
+        createDate=#{createDate},tradeDeposit=#{tradeDeposit} where tradeId = #{tradeId} 
+    </update>
+    
+    
+    <update id="updateSimpleTrade" parameterType="Trade">
+        update trade set tradeName=#{tradeName},userId=#{user.userId},typeId=#{tradeType.typeId} ,
+        price=#{price},trDescript=#{trDescript},tradeNum=#{tradeNum},photo=#{photo},
+        tradeDeposit=#{tradeDeposit} where tradeId = #{tradeId} 
+    </update>
+    
+    <!-- 查询商品总数 -->
+	<select id="findCount" resultType="int">
+		select count(*) from trade
+	</select>
+	
+	<!-- 查询商品总数 -->
+	<select id="findCountByTypeId" resultType="int" parameterType="int">
+		select count(*) from trade where typeId=#{typeId}
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="pageFind" resultMap="TradeList">
+	    select * from trade limit #{0},#{1}
+	</select>
+	<!-- 按类型分页查询 -->
+	<select id="pageFindByTypeId" resultMap="TradeList" parameterType="map">
+	    select * from trade 
+	    <where>
+	    	<if test="typeId!=''">and typeId= #{typeId} </if>
+	    	<if test="tradeName!=''">and tradeName like #{tradeName} </if>
+	    </where>
+	    <choose>
+	        <when test="tradeDeposit!=''"> order by tradeDeposit </when>
+	        <when test="price!=''"> order by price </when>
+	        <otherwise> order by tradeId </otherwise>
+	    </choose>
+	    limit #{index},#{pageSize}
+	</select>
+	
+	<!-- 按商品名称分页查询 -->
+	<select id="pageFindByTradeName" resultMap="TradeList" parameterType="map">
+	    select * from trade 
+	    <where>
+	    	<if test="tradeName!=''">and tradeName like #{tradeName} </if>
+	    </where>
+	    <choose>
+	        <when test="tradeDeposit!=''"> order by tradeDeposit </when>
+	        <when test="price!=''"> order by price </when>
+	        <otherwise> order by tradeId </otherwise>
+	    </choose>
+		limit #{index},#{pageSize}
+	</select>
+</mapper> 

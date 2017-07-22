@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.zhizu.mapper.UserMapper">
+   <resultMap id="UserBase" type="User">
+    <id property="userId" column="userId"/>
+     <result property="userName" column="userName"/>
+     <result property="nickName" column="nickName"/>
+     <result property="password" column="password"/>
+     <result property="sex" column="sex"/>
+     <result property="age" column="age"/>
+     <result property="ctreateDate" column="ctreateDate"/>
+     <result property="birthday" column="birthday"/>
+     <result property="idCard" column="idCard"/>
+     <result property="iphone" column="iphone"/>
+     <result property="address" column="address"/>
+     <result property="photo" column="photo"/>
+   </resultMap>
+   <!-- 继承至基本User，多加了一个comment集合 -->
+    <resultMap id="UserWithComment" type="User" extends="UserBase">
+     <collection property="comment"  column="commentId" select="com.zhuzu.CommentMapper.findById"></collection> 
+    </resultMap>  
+
+ 	<insert id="save" parameterType="User" useGeneratedKeys="true" keyProperty="userId">
+		insert into user
+		values
+		(null,#{userName},#{nickName},#{password},
+		#{sex},#{age},#{createDate},#{birthday},
+		#{idCard},#{iphone},#{address},#{photo})
+	</insert>
+	 
+
+	<update id="update" parameterType="User" >
+		update user set
+		nickName = #{nickName},
+		password = #{password},
+		sex=#{sex},
+		age=#{age},
+		createDate=#{ctreateDate},
+		birthday=#{birthday},
+		isCard=#{idCard},
+		iphone=#{iphone},
+		address=#{address},
+		photo=#{photo}
+		where userId = #{userId}
+	</update>
+	
+	<update id="updateSimpleInfo" parameterType="User">
+		update user set
+		nickName = #{nickName},
+		sex=#{sex},
+		age=#{age},
+		birthday=#{birthday},
+		iphone=#{iphone},
+		address=#{address},
+		photo=#{photo}
+		where userId = #{userId}
+	</update>
+	
+	<update id="updatePassword" >
+		update user set
+		password=#{1}
+		where userId = #{0}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from user where
+		id = #{id}
+	</delete>
+      
+	<select id="findAll" resultType="User">
+		select * from user
+	</select>
+	
+ 	<select id="judgeBlack" resultType="User" parameterType="String">
+		select * from user u,blacklist b where u.userName=#{userName} and u.userId=b.userId
+	</select>
+	 
+	
+	<select id="findById" parameterType="int" resultType="User">
+		select *
+		from user where userId=#{id}
+	</select>
+	
+	<select id="findByUserName" parameterType="String" resultType="User">
+		select *
+		from user where userName=#{userName}
+	</select>
+	
+</mapper>

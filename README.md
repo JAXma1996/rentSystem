@@ -1,2 +1,1 @@
-# rentSystem
-利用最近所学的Mybatis结合Spring，SpringMvc组合开发一个租赁平台
+# RentSystem

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 映射文件通常情况下与数据访问接口类在同一个目录中，文件名与数据访问方法接口名一致 -->
+<!-- namespace:属性映射文件与某一个数据访问接口匹配 -->
+<mapper namespace="com.zhizu.mapper.UserReportMapper">
+
+	<!-- 构建返回的结果集，可以用于返回单个对象的查询，也可以用于返回多个对象的查询 -->
+	<resultMap type="UserReport" id="userReportList">
+		<!-- 映射数据表中的主键       column:表示数据表中的字段    property:表示实体类中的属性-->
+		<id column="reportId" property="reportId"/>
+		<!-- 映射数据表中的普通列      column:表示数据表中的字段    property:表示实体类中的属性-->
+		<result property="rpDescript" column="rpDescript"/>
+		<result property="rpType" column="rpType"/>
+		
+		<!-- 多对一映射   外键列      property：封装数据属性      select：要执行的方法    column：外键列，根据此列中的值获取对象 -->
+		<association property="user" select="com.zhizu.mapper.UserMapper.findById" column="userId"></association>
+		<association property="trade" select="com.zhizu.mapper.TradeMapper.findById" column="tradeId"></association>
+	</resultMap>
+	
+	<select id="findAll" resultMap="userReportList">
+		select * from user_report
+	</select>
+
+	<insert id="save" parameterType="UserReport">
+	    insert into user_report
+		values(null,#{user.userId},#{trade.tradeId},#{rpDescript},#{rpType})
+	</insert>
+	
+	<delete id="delete" parameterType="int">
+	    delete from user_report where reportId = #{reportId}
+	</delete>
+	
+	<select id="findAllByUserId" parameterType="int" resultMap="userReportList">
+		select * from user_report where userId = #{user.userId}
+	</select>
+	
+	<select id="findAllByTradeId" parameterType="int" resultMap="userReportList">
+		select * from user_report where tradeId = #{trade.tradeId}
+	</select>
+	
+	<!--  <update id="update" parameterType="Comment">
+	    update student set tradeId=#{tradeId},comment=#{comment},userId=#{userId},phone=#{phone},address=#{address},email=#{email},birthday=#{birthday} where
+           studentNo = #{studentNo} 
+	</update>-->
+
+</mapper> 
